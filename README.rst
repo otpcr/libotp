@@ -5,7 +5,7 @@ L I B O T P
 **NAME**
 
 
-   OTP - Office of the Prosecutor Communication Record 117 of the year 2019 
+``OTP`` - Office of the Prosecutor Communication Record 117 of the year 2019 
 
 
 **DESCRIPTION**
@@ -32,16 +32,14 @@ threaded so to not block). Client code is intentionally left out.
 **INSTALL**
 
 
-use pip to install this library
-
-    | ``$ pip install libotp``
+``$ pip install libotp``
 
 
 **AUTHOR**
 
-    | Bart Thate <``record11719@gmail.com``>
+Bart Thate <``record11719@gmail.com``>
 
 
 **COPYRIGHT**
 
-    | ``OTP`` is Public Domain.
+``OTP`` is Public Domain.
