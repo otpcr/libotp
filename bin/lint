@@ -22,4 +22,5 @@ def popen(txt):
 if os.path.exists("bin/clean"):
     popen("bin/clean")
 
-popen(f"pylint otp bin/otp tests")
+
+popen(f"pylint otp mods bin/otp tests")

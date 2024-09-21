@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105
+# pylint: disable=R0903,W0105
 
 
 "rich site syndicate"
@@ -35,16 +35,16 @@ def init():
 def spl(txt):
     "split comma separated string into a list."
     try:
-        res = txt.split(',')
+        result = txt.split(',')
     except (TypeError, ValueError):
-        res = txt
-    return [x for x in res if x]
+        result = txt
+    return [x for x in result if x]
 
 
 DEBUG = False
 
 
-TEMPLATE = f"""<opml version="1.0">
+TEMPLATE = """<opml version="1.0">
     <head>
         <title>OPML</title>
     </head>

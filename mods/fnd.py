@@ -7,9 +7,9 @@
 import time
 
 
-from ..object  import fmt
-from ..persist import find, fntime, long, skel, store
-from ..runtime import laps
+from otp.object  import fmt
+from otp.persist import find, fntime, long, skel, store
+from otp.runtime import laps
 
 
 def fnd(event):

@@ -12,6 +12,9 @@ from otp.object  import Object, update
 from otp.runtime import laps
 
 
+STARTTIME = time.time()
+
+
 def thr(event):
     "list threads."
     result = []

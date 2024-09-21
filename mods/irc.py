@@ -36,6 +36,7 @@ def init():
 
 
 def getmain(name):
+    "return object from main program."
     main = sys.modules.get("__main__", None)
     return getattr(main, name)
 
@@ -244,6 +245,7 @@ class IRC(Reactor, Output):
         self.register('PRIVMSG', cb_privmsg)
         self.register('QUIT', cb_quit)
         self.register("366", cb_ready)
+        Broker.add(self, repr(self))
 
     def announce(self, txt):
         "announce on all channels."
