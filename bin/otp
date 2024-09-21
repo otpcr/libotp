@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
+# pylint: disable=R,C0413,C0415,W0105,W0212,W0611
 
 
 "main program"
@@ -114,12 +115,13 @@ def command(bot, evt, txt=""):
 
 
 def scan(mod):
-    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+    "Scan module for commands."
+    for key, cmnd in inspect.getmembers(mod, inspect.isfunction):
         if key.startswith('cb'):
             continue
-        names = cmd.__code__.co_varnames
+        names = cmnd.__code__.co_varnames
         if 'event' in names:
-            Commands.add(cmd)
+            Commands.add(cmnd)
 
 
 class Event(Default):
@@ -132,6 +134,7 @@ class Event(Default):
         self.orig   = ""
         self.result = []
         self.txt    = ""
+        self.type = "event"
 
     def reply(self, txt):
         "add text to the result."

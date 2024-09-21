@@ -37,7 +37,6 @@ def init():
 
 def getmain(name):
     main = sys.modules.get("__main__", None)
-    print(dir(main))
     return getattr(main, name)
 
 
