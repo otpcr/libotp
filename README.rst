@@ -22,7 +22,7 @@ provides an "clean namespace" Object class that only has dunder
 methods, so the namespace is not cluttered with method names. This
 makes storing and reading to/from json possible.
 
-``OTP` has all you need to program a unix nackground daemon, such as disk
+``OTP`` has all you need to program a unix nackground daemon, such as disk
 perisistence for configuration files, event handler to handle the
 client/server connection, deferred exception handling to not crash on an error,
 and a policy to keep the main loop running above anything else (it is all
