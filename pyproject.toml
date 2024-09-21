@@ -1,0 +1,36 @@
+# This file is placed in the Public Domain.
+
+
+title = "LIBOTP"
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libotp"
+version = "1"
+authors = [
+    {name = "Bart Thate", email = "record11719@gmail.com" },
+]
+description = "Office of the Prosecutor Communication Record 117 of the year 2019"
+readme = "README.rst"
+license = { text="Public Domain"}
+classifiers=[
+    'Development Status :: 4 - Beta',
+    'License :: Public Domain',
+    'Operating System :: Unix',
+    'Programming Language :: Python :: 3',
+    'Topic :: Utilities'
+]
+
+[project.urls]
+"home" = "https://pypi.org/project/libotp"
+"bugs" = "https://github.com/rssbotd/libotp/issues"
+"source" = "https://github.com/otpcr/libotp"
+
+
+[tool.setuptools]
+packages = [
+   'otp',
+]

@@ -1,0 +1,515 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"main program"
+
+
+import inspect
+import os
+import pathlib
+import pwd
+import readline
+import sys
+import termios
+import time
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from otp.object  import Default, keys
+from otp.persist import Workdir
+from otp.runtime import Broker, Reactor, errors, launch
+
+
+
+
+class Config(Default):
+
+    "Config"
+
+    name = Default.__module__.split(".", maxsplit=2)[-2]
+    wdr = os.path.expanduser(f"~/.{name}")
+    pidfile = os.path.join(wdr, f"{name}.pid")
+
+    def __init__(self, name=None):
+        self.name = name or Config.name
+        self.wdr = Config.wdr
+        self.pidfile = Config.pidfile
+
+
+Workdir.wdr = Config.wdr
+
+
+STARTTIME = time.time()
+
+
+class Client(Reactor):
+
+    "Client"
+
+    def __init__(self):
+        Reactor.__init__(self)
+        Broker.add(self, repr(self))
+        self.register("command", command)
+
+    def display(self, evt):
+        "show results into a channel."
+        for txt in evt.result:
+            self.say(evt.channel, txt)
+
+    def say(self, _channel, txt):
+        "echo on verbose."
+        self.raw(txt)
+
+    def raw(self, txt):
+        "print to screen."
+        raise NotImplementedError
+
+
+class Console(Client):
+
+    "Console"
+
+    def callback(self, evt):
+        "wait for result."
+        Client.callback(self, evt)
+        if evt._thr:
+            evt._thr.join()
+
+    def poll(self):
+        "poll console and create event."
+        evt = Event()
+        evt.orig = repr(self)
+        evt.txt = input("> ")
+        evt.type = "command"
+        return evt
+
+    def raw(self, txt):
+        "print text."
+        print(txt)
+
+
+class Commands:
+
+    "Commands"
+
+    cmds     = {}
+    modnames = {}
+
+    @staticmethod
+    def add(func):
+        "add command."
+        Commands.cmds[func.__name__] = func
+        if func.__module__ != "__main__":
+            Commands.modnames[func.__name__] = func.__module__
+
+
+def command(bot, evt, txt=""):
+    "check for and run a command."
+    parse(evt, txt or evt.txt)
+    func = Commands.cmds.get(evt.cmd, None)
+    if func:
+        func(evt)
+        bot.display(evt)
+
+
+def scan(mod):
+    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+        if key.startswith('cb'):
+            continue
+        names = cmd.__code__.co_varnames
+        if 'event' in names:
+            Commands.add(cmd)
+
+
+class Event(Default):
+
+    "Event"
+
+    def __init__(self):
+        Default.__init__(self)
+        self._thr   = None
+        self.orig   = ""
+        self.result = []
+        self.txt    = ""
+
+    def reply(self, txt):
+        "add text to the result."
+        self.result.append(txt)
+
+
+"utilities"
+
+
+def banner():
+    "show banner."
+    tme = time.ctime(time.time()).replace("  ", " ")
+    print(f"{Config.name.upper()} since {tme}")
+
+
+def forever():
+    "it doesn't stop, until ctrl-c"
+    while True:
+        time.sleep(1.0)
+
+
+def initer(modstr, *pkgs, disable=None):
+    "scan modules for commands and classes"
+    thrs = []
+    for mod in spl(modstr):
+        if disable and mod in spl(disable):
+            continue
+        for pkg in pkgs:
+            modi = getattr(pkg, mod, None)
+            if not modi:
+                continue
+            if "init" not in dir(modi):
+                continue
+            if "v" in Config.opts:
+                modi.VERBOSE = print
+            thrs.append(launch(modi.init))
+            break
+    return thrs
+
+
+def laps(seconds, short=True):
+    "show elapsed time."
+    txt = ""
+    nsec = float(seconds)
+    if nsec < 1:
+        return f"{nsec:.2f}s"
+    yea = 365*24*60*60
+    week = 7*24*60*60
+    nday = 24*60*60
+    hour = 60*60
+    minute = 60
+    yeas = int(nsec/yea)
+    nsec -= yeas*yea
+    weeks = int(nsec/week)
+    nsec -= weeks*week
+    nrdays = int(nsec/nday)
+    nsec -= nrdays*nday
+    hours = int(nsec/hour)
+    nsec -= hours*hour
+    minutes = int(nsec/minute)
+    nsec -= int(minute*minutes)
+    sec = int(nsec)
+    if yeas:
+        txt += f"{yeas}y"
+    if weeks:
+        nrdays += weeks * 7
+    if nrdays:
+        txt += f"{nrdays}d"
+    if short and txt:
+        return txt.strip()
+    if hours:
+        txt += f"{hours}h"
+    if minutes:
+        txt += f"{minutes}m"
+    if sec:
+        txt += f"{sec}s"
+    txt = txt.strip()
+    return txt
+
+
+def modnames(*args):
+    "return module names."
+    res = []
+    for arg in args:
+        res.extend([x for x in dir(arg) if not x.startswith("__")])
+    return sorted(res)
+
+
+def parse(obj, txt=None):
+    "parse a string for a command."
+    if txt is None:
+        txt = ""
+    args = []
+    obj.args    = []
+    obj.cmd     = ""
+    obj.gets    = Default()
+    obj.hasmods = False
+    obj.index   = None
+    obj.mod     = ""
+    obj.opts    = ""
+    obj.result  = []
+    obj.sets    = Default()
+    obj.txt     = txt
+    obj.otxt    = txt
+    _nr = -1
+    for spli in obj.otxt.split():
+        if spli.startswith("-"):
+            try:
+                obj.index = int(spli[1:])
+            except ValueError:
+                obj.opts += spli[1:]
+            continue
+        if "==" in spli:
+            key, value = spli.split("==", maxsplit=1)
+            val = getattr(obj.gets, key, None)
+            if val:
+                value = val + "," + value
+                setattr(obj.gets, key, value)
+            continue
+        if "=" in spli:
+            key, value = spli.split("=", maxsplit=1)
+            if key == "mod":
+                obj.hasmods = True
+                if obj.mod:
+                    obj.mod += f",{value}"
+                else:
+                    obj.mod = value
+                continue
+            setattr(obj.sets, key, value)
+            continue
+        _nr += 1
+        if _nr == 0:
+            obj.cmd = spli
+            continue
+        args.append(spli)
+    if args:
+        obj.args = args
+        obj.txt  = obj.cmd or ""
+        obj.rest = " ".join(obj.args)
+        obj.txt  = obj.cmd + " " + obj.rest
+    else:
+        obj.txt = obj.cmd or ""
+    return obj
+
+
+def pidfile(pid):
+    "write the pid to a file."
+    if os.path.exists(pid):
+        os.unlink(pid)
+    path = pathlib.Path(pid)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(pid, "w", encoding="utf-8") as fds:
+        fds.write(str(os.getpid()))
+
+
+def privileges(username):
+    "drop privileges."
+    pwnam = pwd.getpwnam(username)
+    os.setgid(pwnam.pw_gid)
+    os.setuid(pwnam.pw_uid)
+
+
+def scanner(modstr, *pkgs, disable=None):
+    "scan modules for commands and classes"
+    thrs = []
+    for mod in spl(modstr):
+        if disable and mod in spl(disable):
+            continue
+        for pkg in pkgs:
+            modi = getattr(pkg, mod, None)
+            if not modi:
+                continue
+            scan(modi)
+            break
+    return thrs
+
+
+def spl(txt):
+    "split comma separated string into a list."
+    try:
+        res = txt.split(',')
+    except (TypeError, ValueError):
+        res = txt
+    return [x for x in res if x]
+
+
+def wrap(func):
+    "reset console."
+    old3 = None
+    try:
+        old3 = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    finally:
+        if old3:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
+    errors(print)
+
+
+def wraps():
+    "Wrap main."
+    wrap(main)
+    errors(print)
+
+
+"commands"
+
+
+def cmd(event):
+    "list commands."
+    event.reply(",".join(sorted(keys(Commands.cmds))))
+
+
+# This file is placed in the Public Domain.
+# pylint: disable=C0413,W0212,W0401,W0614,W0622,W0718
+
+
+"tinder"
+
+
+import os
+import profile
+import shutil
+import sys
+import termios
+import time
+import _thread
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from otp.object  import Object
+from otp.persist import Workdir, skel
+from otp.runtime import errors, later, launch
+
+
+Config.debug  = True
+Config.name = "tinder"
+Config.silent = False
+Config.skip = ["debug",]
+
+
+if os.path.exists("mods"):
+    from mods import face
+else:
+    mods = None
+
+
+face.rss.DEBUG = True
+
+
+LAP = 1
+NRS = 1
+NRCOMMAND = 1
+PERCALL   = 1
+STARTTIME = time.time()
+
+
+events = []
+paylock = _thread.allocate_lock()
+
+
+param = Object()
+param.cmd = [""]
+param.dpl = ["hnrss title,url"]
+param.fnd = ["log", "todo", "rss", "config"]
+param.imp = ["tests/feeds.opml"]
+param.log = ["bla"]
+param.mod = [""]
+param.mre = [""]
+param.nme = ["hnrss hackernews"]
+param.pwd = ["bla mekker"]
+param.rem = ["hnrss"]
+param.req = [""]
+param.res = [""]
+param.rss = ["http://hnrss.org/newest",]
+param.tdo = ["mekker"]
+param.ver = [""]
+
+
+class CLI(Client):
+
+    "command line interface."
+
+    def raw(self, txt):
+        if "v" in Config.opts:
+            print(txt)
+
+
+def consume(evts):
+    "wait for events."
+    for evt in evts:
+        if "_thr" in evt and evt._thr:
+            evt._thr.join()
+
+
+def payload(clt):
+    "do payload."
+    cmdz = Commands.cmds
+    with paylock:
+        nmr = 0
+        for cmdd in cmdz:
+            for ex in getattr(param, cmdd, [""]):
+                evt = Event()
+                evt.orig = repr(clt)
+                evt.txt = cmdd + " " + ex
+                evt.type = "command"
+                clt.put(evt)
+                events.append(evt)
+                nmr += 1
+        return nmr
+
+
+def wrapped(function):
+    "reset terminal."
+    old2 = None
+    try:
+        old2 = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        function()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    except Exception as ex:
+        later(ex)
+    finally:
+        if old2:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
+
+
+def mainer():
+    "main"
+    clt = CLI()
+    clt.start()
+    for _nr in range(nrs):
+        launch(payload, clt)
+    clt.wait()
+    consume(events)
+    errors(print)
+    if "v" in Config.opts:
+        endtime = time.time()
+        lap = laps(endtime-STARTTIME)
+        percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
+        print(f"{lap} {nrs} {NRCOMMAND} {percall}")
+
+
+if __name__ == "__main__":
+    Workdir.wdr = ".test"
+    parse(Config, " ".join(sys.argv[1:]))
+    if os.path.exists('mods'):
+        from mods import face
+    else:
+        face = None
+    Config.mod = ",".join(modnames(face))
+    if "v" in Config.opts:
+        banner()
+    scanner(Config.mod, face)
+    if "f" in Config.opts:
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
+    skel()
+    nrs = Config.index or 1
+    NRCOMMAND = len(Commands.cmds) or 1
+    if "p" in Config.opts:
+        profile.runctx(mainer.__code__, globals(), locals())
+    else:
+        wrapped(mainer)
+    os._exit(0)
+
+
+if __name__ == "__main__":
+    wrap(main)
+    
