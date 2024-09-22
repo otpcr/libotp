@@ -8,8 +8,8 @@ import threading
 import time
 
 
+from otp.client  import laps
 from otp.object  import Object, update
-from otp.runtime import laps
 
 
 STARTTIME = time.time()

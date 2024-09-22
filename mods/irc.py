@@ -17,6 +17,7 @@ import time
 import _thread
 
 
+from otp.client  import Client, command
 from otp.object  import Default, Object, edit, fmt, keys
 from otp.persist import last, sync
 from otp.runtime import Broker, Reactor, later, launch
@@ -33,15 +34,6 @@ def init():
     irc.start()
     irc.events.ready.wait()
     return irc
-
-
-def getmain(name):
-    "return object from main program."
-    main = sys.modules.get("__main__", None)
-    return getattr(main, name)
-
-
-command = getmain("command")
 
 
 "configuration"
@@ -211,12 +203,12 @@ class Output:
 "IRC"
 
 
-class IRC(Reactor, Output):
+class IRC(Client, Output):
 
     "IRC"
 
     def __init__(self):
-        Reactor.__init__(self)
+        Client.__init__(self)
         Output.__init__(self)
         self.buffer = []
         self.cfg = Config()
@@ -556,7 +548,7 @@ class IRC(Reactor, Output):
         self.events.connected.clear()
         self.events.joined.clear()
         launch(Output.out, self)
-        Reactor.start(self)
+        Client.start(self)
         launch(
                self.doconnect,
                self.cfg.server or "localhost",
@@ -572,7 +564,7 @@ class IRC(Reactor, Output):
         self.disconnect()
         self.dostop.set()
         self.oput(None, None)
-        Reactor.stop(self)
+        Client.stop(self)
 
     def wait(self):
         "wait for ready."

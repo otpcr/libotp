@@ -1,10 +1,11 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105,W0212,W0718
+# pylint: disable=R,W0212,W0718
 
 
 "runtime"
 
 
+import inspect
 import queue
 import threading
 import time
@@ -13,7 +14,7 @@ import types
 import _thread
 
 
-"broker"
+STARTTIME = time.time()
 
 
 class Broker:
@@ -39,9 +40,6 @@ class Broker:
     def get(orig):
         "return object by matching repr."
         return Broker.objs.get(orig)
-
-
-"errors"
 
 
 class Errors:
@@ -73,9 +71,6 @@ def later(exc):
     fmt = fmat(excp)
     if fmt not in Errors.errors:
         Errors.errors.append(fmt)
-
-
-"reactor"
 
 
 class Reactor:
@@ -135,9 +130,6 @@ class Reactor:
             time.sleep(0.1)
 
 
-"thread"
-
-
 class Thread(threading.Thread):
 
     "Thread"
@@ -189,9 +181,6 @@ def launch(func, *args, **kwargs):
     return thread
 
 
-"timer"
-
-
 class Timer:
 
     "Timer"
@@ -228,9 +217,6 @@ class Timer:
             self.timer.cancel()
 
 
-"repeater"
-
-
 class Repeater(Timer):
 
     "Repeater"
@@ -238,52 +224,6 @@ class Repeater(Timer):
     def run(self):
         launch(self.start)
         super().run()
-
-
-"utilitites"
-
-
-def laps(seconds, short=True):
-    "show elapsed time."
-    txt = ""
-    nsec = float(seconds)
-    if nsec < 1:
-        return f"{nsec:.2f}s"
-    yea = 365*24*60*60
-    week = 7*24*60*60
-    nday = 24*60*60
-    hour = 60*60
-    minute = 60
-    yeas = int(nsec/yea)
-    nsec -= yeas*yea
-    weeks = int(nsec/week)
-    nsec -= weeks*week
-    nrdays = int(nsec/nday)
-    nsec -= nrdays*nday
-    hours = int(nsec/hour)
-    nsec -= hours*hour
-    minutes = int(nsec/minute)
-    nsec -= int(minute*minutes)
-    sec = int(nsec)
-    if yeas:
-        txt += f"{yeas}y"
-    if weeks:
-        nrdays += weeks * 7
-    if nrdays:
-        txt += f"{nrdays}d"
-    if short and txt:
-        return txt.strip()
-    if hours:
-        txt += f"{hours}h"
-    if minutes:
-        txt += f"{minutes}m"
-    if sec:
-        txt += f"{sec}s"
-    txt = txt.strip()
-    return txt
-
-
-"methods"
 
 
 def named(obj):
@@ -302,9 +242,6 @@ def named(obj):
     if '__name__' in dir(obj):
         return f'{obj.__class__.__name__}.{obj.__name__}'
     return None
-
-
-"interface"
 
 
 def __dir__():
