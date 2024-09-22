@@ -10,7 +10,6 @@ import os
 import queue
 import socket
 import ssl
-import sys
 import textwrap
 import threading
 import time
@@ -20,12 +19,12 @@ import _thread
 from otp.client  import Client, command
 from otp.object  import Default, Object, edit, fmt, keys
 from otp.persist import last, sync
-from otp.runtime import Broker, Reactor, later, launch
+from otp.runtime import Broker, later, launch
 
 
 NAME = Default.__module__.split(".", maxsplit=2)[-2]
 VERBOSE = False
-saylock  = _thread.allocate_lock()
+saylock = _thread.allocate_lock()
 
 
 def init():

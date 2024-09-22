@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0212,W0718
+# pylint: disable=R,W0105,W0212,W0718
 
 
 "client"
@@ -7,6 +7,8 @@
 
 import inspect
 import os
+import pathlib
+import pwd
 import sys
 import termios
 import time
@@ -15,7 +17,7 @@ import _thread
 
 from .object  import Default
 from .persist import Workdir
-from .runtime import Broker, Reactor, errors, later
+from .runtime import Broker, Reactor, later
 
 
 "config"
@@ -156,7 +158,7 @@ def forever():
         try:
             time.sleep(1.0)
         except (KeyboardInterrupt, EOFError):
-           _thread.interrupt_main()
+            _thread.interrupt_main()
 
 
 def laps(seconds, short=True):
@@ -281,7 +283,7 @@ def privileges(username):
     os.setuid(pwnam.pw_uid)
 
 
-def scanner(modstr, *pkgs, disable=None, init=False):
+def scanner(modstr, *pkgs, disable=None):
     "scan modules for commands and classes"
     mods = []
     for mod in spl(modstr):
