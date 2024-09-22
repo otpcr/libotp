@@ -16,31 +16,6 @@ import _thread
 STARTTIME = time.time()
 
 
-class Broker:
-
-    "Broker"
-
-    objs = {}
-
-    @staticmethod
-    def add(obj, key):
-        "add object."
-        Broker.objs[key] = obj
-
-    @staticmethod
-    def all(kind=None):
-        "return all objects."
-        if kind is not None:
-            for key in [x for x in Broker.objs if kind in x]:
-                yield Broker.get(key)
-        return Broker.objs.values()
-
-    @staticmethod
-    def get(orig):
-        "return object by matching repr."
-        return Broker.objs.get(orig)
-
-
 class Errors:
 
     "Errors"
@@ -172,14 +147,6 @@ class Thread(threading.Thread):
             later(ex)
 
 
-def launch(func, *args, **kwargs):
-    "launch a thread."
-    nme = kwargs.get("name", named(func))
-    thread = Thread(func, nme, *args, **kwargs)
-    thread.start()
-    return thread
-
-
 class Timer:
 
     "Timer"
@@ -225,6 +192,14 @@ class Repeater(Timer):
         super().run()
 
 
+def launch(func, *args, **kwargs):
+    "launch a thread."
+    nme = kwargs.get("name", named(func))
+    thread = Thread(func, nme, *args, **kwargs)
+    thread.start()
+    return thread
+
+
 def named(obj):
     "return a full qualified name of an object/function/module."
     if isinstance(obj, types.ModuleType):
@@ -245,14 +220,13 @@ def named(obj):
 
 def __dir__():
     return (
-        'Broker',
         'Errors',
         'Reactor',
         'Repeater',
         'Thread',
         'Timer',
         'errors',
-        'later'
+        'later',
         'launch',
         'named'
     )

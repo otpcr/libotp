@@ -17,8 +17,32 @@ import _thread
 
 from .object  import Default
 from .persist import Workdir
-from .runtime import Broker, Reactor, later
+from .runtime import Reactor, later
 
+
+class Broker:
+
+    "Broker"
+
+    objs = {}
+
+    @staticmethod
+    def add(obj, key):
+        "add object."
+        Broker.objs[key] = obj
+
+    @staticmethod
+    def all(kind=None):
+        "return all objects."
+        if kind is not None:
+            for key in [x for x in Broker.objs if kind in x]:
+                yield Broker.get(key)
+        return Broker.objs.values()
+
+    @staticmethod
+    def get(orig):
+        "return object by matching repr."
+        return Broker.objs.get(orig)
 
 
 class Config(Default):
@@ -315,6 +339,7 @@ def wrap(func, outer):
 
 def __dir__():
     return (
+        'Broker',
         'Config',
         'Client',
         'Commands',

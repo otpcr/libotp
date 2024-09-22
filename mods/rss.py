@@ -20,10 +20,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from otp.client  import laps
+from otp.client  import Broker, laps
 from otp.object  import Default, Object, construct, fmt, update
 from otp.persist import find, fntime, last, sync
-from otp.runtime import Broker, Repeater, launch
+from otp.runtime import Repeater, launch
 
 
 def init():

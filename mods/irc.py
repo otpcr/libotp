@@ -16,10 +16,10 @@ import time
 import _thread
 
 
-from otp.client  import Client, command
+from otp.client  import Broker, Client, command
 from otp.object  import Default, Object, edit, fmt, keys
 from otp.persist import last, sync
-from otp.runtime import Broker, later, launch
+from otp.runtime import later, launch
 
 
 NAME = Default.__module__.split(".", maxsplit=2)[-2]
