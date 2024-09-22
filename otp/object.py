@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105
+# pylint: disable=R
 
 
 "a clean namespace"
@@ -31,18 +31,12 @@ class Object:
         return str(self.__dict__)
 
 
-"default"
-
-
 class Default(Object):
 
     "Default"
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
-
-
-"methods"
 
 
 def construct(obj, *args, **kwargs):
@@ -183,9 +177,6 @@ def values(obj):
     return obj.__dict__.values()
 
 
-"decoder"
-
-
 class ObjectDecoder(json.JSONDecoder):
 
     "ObjectDecoder"
@@ -227,9 +218,6 @@ def loads(string, *args, **kw):
     kw["cls"] = ObjectDecoder
     kw["object_hook"] = hook
     return json.loads(string, *args, **kw)
-
-
-"encoder"
 
 
 class ObjectEncoder(json.JSONEncoder):
@@ -276,9 +264,6 @@ def dumps(*args, **kw):
     "dump object to string."
     kw["cls"] = ObjectEncoder
     return json.dumps(*args, **kw)
-
-
-"interface"
 
 
 def __dir__():

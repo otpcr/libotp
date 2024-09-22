@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105,W0212,W0718
+# pylint: disable=R,W0212,W0718
 
 
 "client"
@@ -20,8 +20,6 @@ from .persist import Workdir
 from .runtime import Broker, Reactor, later
 
 
-"config"
-
 
 class Config(Default):
 
@@ -38,9 +36,6 @@ class Config(Default):
 
 
 Workdir.wdr = Config.wdr
-
-
-"client"
 
 
 class Client(Reactor):
@@ -64,9 +59,6 @@ class Client(Reactor):
     def raw(self, txt):
         "print to screen."
         raise NotImplementedError
-
-
-"commands"
 
 
 class Commands:
@@ -103,9 +95,6 @@ def scan(mod):
             Commands.add(cmnd)
 
 
-"event"
-
-
 class Event(Default):
 
     "Event"
@@ -121,9 +110,6 @@ class Event(Default):
     def reply(self, txt):
         "add text to the result."
         self.result.append(txt)
-
-
-"utilities"
 
 
 def banner(outer):
@@ -325,9 +311,6 @@ def wrap(func, outer):
     finally:
         if old3:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
-
-
-"interface"
 
 
 def __dir__():

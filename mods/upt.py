@@ -12,4 +12,5 @@ from otp.runtime import STARTTIME
 
 
 def upt(event):
+    "show uptime"
     event.reply(laps(time.time()-STARTTIME))

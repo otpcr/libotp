@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R0903,W0105
+# pylint: disable=R
 
 
 "persistence"
@@ -23,9 +23,6 @@ disklock = _thread.allocate_lock()
 
 class ReadError(Exception):
     "error reading json file."
-
-
-"workdir"
 
 
 class Workdir:
@@ -71,9 +68,6 @@ def types():
 def whitelist(clz):
     "whitelist classes."
     Workdir.fqns.append(fqn(clz))
-
-
-"utilities"
 
 
 def cdir(pth):
@@ -138,9 +132,6 @@ def strip(pth, nmr=3):
     return os.sep.join(pth.split(os.sep)[-nmr:])
 
 
-"methods"
-
-
 def fetch(obj, pth):
     "read object from disk."
     with disklock:
@@ -191,9 +182,6 @@ def write(obj, pth):
         cdir(pth)
         with open(pth, 'w', encoding='utf-8') as ofile:
             dump(obj, ofile, indent=4)
-
-
-"interface"
 
 
 def __dir__():

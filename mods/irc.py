@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105,W0201,W0718,E1102
+# pylint: disable=R,W0201,W0718,E1102
 
 
 "internet relay chat"
@@ -33,9 +33,6 @@ def init():
     irc.start()
     irc.events.ready.wait()
     return irc
-
-
-"configuration"
 
 
 class Config(Default):
@@ -84,9 +81,6 @@ class Event(Default):
         self.result.append(txt)
 
 
-"logging"
-
-
 class Logging:
 
     "Logging"
@@ -106,8 +100,6 @@ def debug(txt):
     if VERBOSE:
         VERBOSE(txt)
 
-"textwrap"
-
 
 class TextWrap(textwrap.TextWrapper):
 
@@ -124,9 +116,6 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
-
-
-"output cache"
 
 
 class Output:
@@ -197,9 +186,6 @@ class Output:
         if chan in Output.cache:
             return len(getattr(Output.cache, chan, []))
         return 0
-
-
-"IRC"
 
 
 class IRC(Client, Output):
@@ -570,9 +556,6 @@ class IRC(Client, Output):
         self.events.ready.wait()
 
 
-"callbacks"
-
-
 def cb_auth(bot, evt):
     "auth callback."
     bot.docommand(f'AUTHENTICATE {bot.cfg.password}')
@@ -654,13 +637,6 @@ def cb_quit(bot, evt):
     debug(f"quit from {bot.cfg.server}")
     if evt.orig and evt.orig in bot.zelf:
         bot.stop()
-
-
-"utilities"
-
-
-
-"commands"
 
 
 def cfg(event):

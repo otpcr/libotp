@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R0903,W0105
+# pylint: disable=R
 
 
 "rich site syndicate"
@@ -386,9 +386,6 @@ def syn(event):
     event.reply(f"{nrs} feeds synced")
 
 
-"OPML"
-
-
 class OPMLParser:
 
     "OPMLParser"
@@ -467,9 +464,6 @@ def shortid():
 def attrs(obj, txt):
     "parse attributes into the object."
     update(obj, OPMLParser.parse(txt))
-
-
-"commands"
 
 
 def exp(event):
