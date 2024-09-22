@@ -104,7 +104,6 @@ def payload(clt):
                 evt.orig = repr(clt)
                 evt.txt = cmdd + " " + ex
                 evt.type = "command"
-                print(evt)
                 clt.put(evt)
                 events.append(evt)
                 nmr += 1
@@ -142,6 +141,6 @@ if __name__ == "__main__":
     if "p" in Config.opts:
         profile.runctx(mainer.__code__, globals(), locals())
     else:
-        wrap(mainer)
+        wrap(mainer, print)
     errors(print)
     os._exit(0)

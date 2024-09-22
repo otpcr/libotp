@@ -11,4 +11,4 @@ import os
 __doc__ = __file__.rsplit(os.sep, maxsplit=2)[-2].upper()
 
 
-from . import object, persist, runtime
+from . import client, object, persist, runtime
