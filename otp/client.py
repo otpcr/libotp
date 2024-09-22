@@ -102,6 +102,7 @@ def scan(mod):
         if 'event' in names:
             Commands.add(cmnd)
 
+
 "event"
 
 
@@ -308,7 +309,7 @@ def spl(txt):
     return [x for x in res if x]
 
 
-def wrap(func):
+def wrap(func, outer):
     "reset console."
     old3 = None
     try:
@@ -318,12 +319,15 @@ def wrap(func):
     try:
         func()
     except (KeyboardInterrupt, EOFError):
-        print("")
+        outer("")
     except Exception as ex:
         later(ex)
     finally:
         if old3:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
+
+
+"interface"
 
 
 def __dir__():
@@ -342,5 +346,6 @@ def __dir__():
         'privileges',
         'scanner',
         'spl',
-        'wrap'
+        'wrap',
+        'wrapped'
     )

@@ -18,30 +18,14 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otp.client  import Client, Commands, modnames, parse, scanner
+from otp.client  import Client, Commands, Config, Event
+from otp.client  import laps, modnames, parse, scanner, wrap
 from otp.object  import Default, Object
 from otp.persist import Workdir, skel
 from otp.runtime import errors, later, launch
 
 
 STARTTIME = time.time()
-
-
-class Config(Default):
-
-    "Config"
-
-    name = Default.__module__.split(".", maxsplit=2)[-2]
-    wdr = os.path.expanduser(f"~/.{name}")
-    pidfile = os.path.join(wdr, f"{name}.pid")
-
-    def __init__(self, name=None):
-        self.name = name or Config.name
-        self.wdr = Config.wdr
-        self.pidfile = Config.pidfile
-
-
-Workdir.wdr = Config.wdr
 
 
 Config.debug  = True
@@ -51,12 +35,12 @@ Config.skip = ["debug",]
 
 
 if os.path.exists("mods"):
-    from mods import face
+    from mods import face as MODS
 else:
-    mods = None
+    MODS = None
 
 
-face.rss.DEBUG = True
+MODS.rss.DEBUG = True
 
 
 LAP = 1
@@ -112,48 +96,39 @@ def consume(evts):
 
 def payload(clt):
     "do payload."
-    cmdz = Commands.cmds
     with paylock:
         nmr = 0
-        for cmdd in cmdz:
+        for cmdd in Commands.cmds:
             for ex in getattr(param, cmdd, [""]):
                 evt = Event()
                 evt.orig = repr(clt)
                 evt.txt = cmdd + " " + ex
                 evt.type = "command"
+                print(evt)
                 clt.put(evt)
                 events.append(evt)
                 nmr += 1
         return nmr
 
 
-def wrapped(function):
-    "reset terminal."
-    old2 = None
-    try:
-        old2 = termios.tcgetattr(sys.stdin.fileno())
-    except termios.error:
-        pass
-    try:
-        function()
-    except (KeyboardInterrupt, EOFError):
-        print("")
-    except Exception as ex:
-        later(ex)
-    finally:
-        if old2:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
-
-
 def mainer():
     "main"
+    NRCOMMAND = len(Commands.cmds) or 1
+    if "v" in Config.opts:
+        banner()
+    Config.mod = ",".join(modnames(MODS))
+    scanner(Config.mod, MODS)
+    if "f" in Config.opts:
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
+    skel()
     clt = CLI()
     clt.start()
+    nrs = Config.index or 1
     for _nr in range(nrs):
         launch(payload, clt)
     clt.wait()
     consume(events)
-    errors(print)
     if "v" in Config.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
@@ -164,27 +139,9 @@ def mainer():
 if __name__ == "__main__":
     Workdir.wdr = ".test"
     parse(Config, " ".join(sys.argv[1:]))
-    if os.path.exists('mods'):
-        from mods import face
-    else:
-        face = None
-    Config.mod = ",".join(modnames(face))
-    if "v" in Config.opts:
-        banner()
-    scanner(Config.mod, face)
-    if "f" in Config.opts:
-        if os.path.exists(Workdir.wdr):
-            shutil.rmtree(Workdir.wdr)
-    skel()
-    nrs = Config.index or 1
-    NRCOMMAND = len(Commands.cmds) or 1
     if "p" in Config.opts:
         profile.runctx(mainer.__code__, globals(), locals())
     else:
-        wrapped(mainer)
+        wrap(mainer)
+    errors(print)
     os._exit(0)
-
-
-if __name__ == "__main__":
-    wrap(main)
-    

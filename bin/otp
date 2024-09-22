@@ -60,7 +60,7 @@ class Console(Client):
 
 def wraps():
     "Wrap main."
-    wrap(main)
+    wrap(main, print)
     errors(print)
 
 
