@@ -66,7 +66,7 @@ def initter(modstr, *pkgs, disable=None):
             if not modi:
                 continue
             if "init" in dir(modi):
-                thrs.append(launch(mod.init))
+                thrs.append(launch(modi.init))
             break
     return thrs
 

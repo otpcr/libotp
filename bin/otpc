@@ -56,15 +56,15 @@ def main():
     "main"
     readline.redisplay()
     parse(Config, " ".join(sys.argv[1:]))
-    mod = ",".join(modnames(MODS))
+    modstr = ",".join(modnames(MODS))
     user = getpass.getuser()
     if "v" in Config.opts:
         banner(print)
-    for mod in scanner(mod, MODS):
+    for mod in scanner(modstr, MODS):
         if "v" in Config.opts:
             mod.VERBOSE = print
-    if "i" in Cfg.opts:
-        thrs = initter(mod, MODS)
+    if "i" in Config.opts:
+        thrs = initter(modstr, MODS)
         for thr in thrs:
             thr.join()
     csl = Console()
