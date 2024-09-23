@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"console"
+
+
+import getpass
+import os
+import readline
+import sys
+
+
+sys.path.insert(0, os.getcwd())
+
+
+
+from otp.config  import Config
+from otp.client  import Client
+from otp.command import command, parse, scanner
+from otp.event   import Event
+from otp.main    import banner, forever, modnames
+from otp.main    import privileges, wrap
+from otp.runtime import errors
+
+
+if os.path.exists('mods'):
+    from mods import face as MODS
+else:
+    MODS = None
+
+
+class Console(Client):
+
+    "Console"
+
+    def callback(self, evt):
+        "wait for result."
+        Client.callback(self, evt)
+        if evt._thr:
+            evt._thr.join()
+
+    def poll(self):
+        "poll console and create event."
+        evt = Event()
+        evt.orig = repr(self)
+        evt.txt = input("> ")
+        evt.type = "command"
+        return evt
+
+    def raw(self, txt):
+        "print text."
+        print(txt)
+
+
+def main():
+    "main"
+    readline.redisplay()
+    parse(Config, " ".join(sys.argv[1:]))
+    Config.mod = ",".join(modnames(MODS))
+    Config.user = getpass.getuser()
+    if "v" in Config.opts:
+        banner(print)
+    for mod in scanner(Config.mod, MODS):
+        if "v" in Config.opts:
+            mod.VERBOSE = print
+        if "i" in Config.opts and "init" in dir(mod):
+            mod.init()
+    csl = Console()
+    csl.start()
+    forever()
+
+
+if __name__ == "__main__":
+    wrap(main, print)
+    errors(print)
