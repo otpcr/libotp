@@ -23,4 +23,4 @@ if os.path.exists("bin/clean"):
     popen("bin/clean")
 
 
-popen(f"pylint otp mods bin/otp tests")
+popen(f"pylint otpcr mods bin tests")

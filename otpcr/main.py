@@ -15,7 +15,8 @@ import _thread
 
 
 from otpcr.config  import Config
-from otp.runtime   import later
+from otpcr.runtime import later, launch
+from otpcr.utils   import spl
 
 
 def banner(outer):
@@ -52,6 +53,22 @@ def forever():
             time.sleep(1.0)
         except (KeyboardInterrupt, EOFError):
             _thread.interrupt_main()
+
+
+def initter(modstr, *pkgs, disable=None):
+    "scan modules for commands and classes"
+    thrs = []
+    for mod in spl(modstr):
+        if disable and mod in spl(disable):
+            continue
+        for pkg in pkgs:
+            modi = getattr(pkg, mod, None)
+            if not modi:
+                continue
+            if "init" in dir(modi):
+                thrs.append(launch(mod.init))
+            break
+    return thrs
 
 
 def modnames(*args):
@@ -102,6 +119,7 @@ def __dir__():
         'banner',
         'daemon',
         'forever',
+        'initter',
         'laps',
         'modnames',
         'pidfile',

@@ -22,9 +22,9 @@ from urllib.parse import quote_plus, urlencode
 
 from otpcr.broker  import Broker
 from otpcr.utils   import laps
-from otp.object  import Default, Object, construct, fmt, update
-from otp.persist import find, fntime, last, sync
-from otp.runtime import Repeater, launch
+from otpcr.object  import Default, Object, construct, fmt, update
+from otpcr.persist import find, fntime, last, sync
+from otpcr.runtime import Repeater, launch
 
 
 def init():

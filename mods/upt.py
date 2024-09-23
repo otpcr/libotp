@@ -7,8 +7,8 @@
 import time
 
 
-from otp.runtime import STARTTIME
-from otpcr.utils import laps
+from otpcr.runtime import STARTTIME
+from otpcr.utils   import laps
 
 
 def upt(event):

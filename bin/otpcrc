@@ -17,11 +17,10 @@ sys.path.insert(0, os.getcwd())
 
 from otpcr.config  import Config
 from otpcr.client  import Client
-from otpcr.command import command, parse, scanner
-from otpcr.event   import Event
-from otpcr.main    import banner, forever, modnames
+from otpcr.command import Event, command, parse, scanner
+from otpcr.main    import banner, forever, initter, modnames
 from otpcr.main    import privileges, wrap
-from otpcr.runtime   import errors
+from otpcr.runtime import errors
 
 
 if os.path.exists('mods'):
@@ -57,15 +56,17 @@ def main():
     "main"
     readline.redisplay()
     parse(Config, " ".join(sys.argv[1:]))
-    Config.mod = ",".join(modnames(MODS))
-    Config.user = getpass.getuser()
+    mod = ",".join(modnames(MODS))
+    user = getpass.getuser()
     if "v" in Config.opts:
         banner(print)
-    for mod in scanner(Config.mod, MODS):
+    for mod in scanner(mod, MODS):
         if "v" in Config.opts:
             mod.VERBOSE = print
-        if "i" in Config.opts and "init" in dir(mod):
-            mod.init()
+    if "i" in Cfg.opts:
+        thrs = initter(mod, MODS)
+        for thr in thrs:
+            thr.join()
     csl = Console()
     csl.start()
     forever()

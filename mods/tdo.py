@@ -8,8 +8,8 @@
 import time
 
 
-from otp.object  import Object
-from otp.persist import find, fntime, sync
+from otpcr.object  import Object
+from otpcr.persist import find, fntime, sync
 from otpcr.utils import laps
 
 

@@ -4,7 +4,7 @@
 "show errors"
 
 
-from otp.runtime import Errors
+from otpcr.runtime import Errors
 
 
 def err(event):

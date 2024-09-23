@@ -16,8 +16,7 @@ sys.path.insert(0, os.getcwd())
 
 from otpcr.config  import Config
 from otpcr.client  import Client
-from otpcr.command import command, parse, scanner
-from otpcr.event   import Event
+from otpcr.command import Event, command, parse, scanner
 from otpcr.main    import banner, modnames, privileges, wrap
 from otpcr.runtime import errors
 

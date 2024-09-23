@@ -17,7 +17,7 @@ import _thread
 
 
 from otpcr.client  import Broker, Client, command
-from otpcr.event   import Event
+from otpcr.command import Event
 from otpcr.object  import Default, Object, edit, fmt, keys
 from otpcr.persist import last, sync
 from otpcr.runtime import later, launch

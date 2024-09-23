@@ -5,7 +5,7 @@
 
 
 from otpcr.command import Commands
-from otp.object    import keys
+from otpcr.object    import keys
 
 
 def cmd(event):

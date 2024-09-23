@@ -8,8 +8,8 @@ import threading
 import time
 
 
-from otp.object  import Object, update
-from otp.runtime import STARTTIME
+from otpcr.object  import Object, update
+from otpcr.runtime import STARTTIME
 from otpcr.utils import laps
 
 
