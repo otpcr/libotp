@@ -18,8 +18,9 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otp.client  import Client, Commands, Config, Event
-from otp.client  import laps, modnames, parse, scanner, wrap
+from otp.config  import Config
+from otp.client  import Client, Commands, laps, modnames, parse, scanner, wrap
+from otp.event   import Event
 from otp.object  import Default, Object
 from otp.persist import Workdir, skel
 from otp.runtime import errors, later, launch
