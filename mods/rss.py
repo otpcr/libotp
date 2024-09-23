@@ -58,6 +58,9 @@ fetchlock  = _thread.allocate_lock()
 importlock = _thread.allocate_lock()
 
 
+skipped = []
+
+
 class Feed(Default):
 
     "Feed"
@@ -501,11 +504,13 @@ def imp(event):
     with importlock:
         for obj in prs.parse(txt, 'outline', "name,display_list,xmlUrl"):
             url = obj.xmlUrl
+            if url in skipped:
+                continue
             if not url.startswith("http"):
-                nrskip += 1
                 continue
             has = list(find("rss", {'rss': url}, matching=True))
             if has:
+                skipped.append(url)
                 nrskip += 1
                 continue
             feed = Rss()

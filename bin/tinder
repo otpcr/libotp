@@ -18,17 +18,15 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otp.config  import Config
-from otp.client  import Client
-from otp.command import Commands, parse, scanner
-from otp.event   import Event
-from otp.main    import modnames, wrap
-from otp.object  import Default, Object
-from otp.persist import Workdir, skel
-from otp.runtime import errors, later, launch
-from otp.utils   import laps
-
-STARTTIME = time.time()
+from otpcr.config  import Config
+from otpcr.client  import Client
+from otpcr.command import Commands, parse, scanner
+from otpcr.event   import Event
+from otpcr.main    import modnames, wrap
+from otpcr.object  import Default, Object
+from otpcr.persist import Workdir, skel
+from otpcr.runtime import STARTTIME, errors, later, launch
+from otpcr.utils   import laps
 
 
 Config.debug  = True
