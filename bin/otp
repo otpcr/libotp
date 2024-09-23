@@ -15,7 +15,9 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from otp.client  import Client, Config, Event
+from otp.config  import Config
+from otp.event   import Event
+from otp.client  import Client
 from otp.client  import banner, command, daemon, forever, modnames, parse
 from otp.client  import pidfile, privileges, scanner, wrap
 from otp.runtime import errors
