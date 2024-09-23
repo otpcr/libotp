@@ -1,4 +1,8 @@
 # This file is placed in the Public Domain.
+# pylint: disable=R0903
+
+
+"configuration"
 
 
 import os

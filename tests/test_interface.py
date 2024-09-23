@@ -26,10 +26,7 @@ PACKAGE = [
     '__name__',
     '__package__',
     '__path__',
-    '__spec__',
-    'object',
-    'persist',
-    'runtime'
+    '__spec__'
 ]
 
 

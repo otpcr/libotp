@@ -1,15 +1,21 @@
 # This file is placed in the Public Domain.
+# pylint: disable=R.W0105,W0212,W0718
+
+
+"client"
 
 
 import inspect
 import os
 import pathlib
+import pwd
 import sys
 import termios
 import time
 import _thread
 
 
+from .config  import Config
 from .event   import parse
 from .runtime import Reactor, later
 

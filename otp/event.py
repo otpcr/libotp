@@ -1,4 +1,8 @@
 # This file is placed in the Public Domain.
+# pylint: disable=R
+
+
+"event"
 
 
 from .object  import Default
