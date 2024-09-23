@@ -16,13 +16,14 @@ import time
 import _thread
 
 
-from otp.client  import Broker, Client, command
-from otp.object  import Default, Object, edit, fmt, keys
-from otp.persist import last, sync
-from otp.runtime import later, launch
+from otpcr.client  import Broker, Client, command
+from otpcr.event   import Event
+from otpcr.object  import Default, Object, edit, fmt, keys
+from otpcr.persist import last, sync
+from otpcr.runtime import later, launch
 
 
-NAME = Default.__module__.split(".", maxsplit=2)[-2]
+NAME = Client.__module__.split(".", maxsplit=2)[-2]
 VERBOSE = False
 saylock = _thread.allocate_lock()
 
@@ -63,22 +64,6 @@ class Config(Default):
         self.realname = self.realname or Config.realname
         self.server = self.server or Config.server
         self.username = self.username or Config.username
-
-
-class Event(Default):
-
-    "Event"
-
-    def __init__(self):
-        Default.__init__(self)
-        self._thr   = None
-        self.orig   = ""
-        self.result = []
-        self.txt    = ""
-
-    def reply(self, txt):
-        "add text to the result."
-        self.result.append(txt)
 
 
 class Logging:

@@ -5,7 +5,7 @@
 "event"
 
 
-from .object import Default
+from otp.object import Default
 
 
 class Event(Default):

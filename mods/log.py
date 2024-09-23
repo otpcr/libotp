@@ -10,7 +10,7 @@ import time
 
 from otp.object  import Object
 from otp.persist import find, sync, fntime
-from otp.utils   import laps
+from otpcr.utils import laps
 
 
 class Log(Object):

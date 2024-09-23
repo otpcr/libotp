@@ -10,7 +10,7 @@ import time
 
 from otp.object  import Object, update
 from otp.runtime import STARTTIME
-from otp.utils   import laps
+from otpcr.utils import laps
 
 
 def thr(event):

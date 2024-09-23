@@ -15,13 +15,13 @@ sys.path.insert(0, os.getcwd())
 
 
 
-from otp.config  import Config
-from otp.client  import Client
-from otp.command import command, parse, scanner
-from otp.event   import Event
-from otp.main    import banner, forever, modnames
-from otp.main    import privileges, wrap
-from otp.runtime import errors
+from otpcr.config  import Config
+from otpcr.client  import Client
+from otpcr.command import command, parse, scanner
+from otpcr.event   import Event
+from otpcr.main    import banner, forever, modnames
+from otpcr.main    import privileges, wrap
+from otpcr.runtime   import errors
 
 
 if os.path.exists('mods'):

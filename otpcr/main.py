@@ -14,8 +14,8 @@ import time
 import _thread
 
 
-from .config  import Config
-from .runtime import later
+from otpcr.config  import Config
+from otp.runtime   import later
 
 
 def banner(outer):
