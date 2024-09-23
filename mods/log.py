@@ -8,9 +8,9 @@
 import time
 
 
-from otpcr.object  import Object
-from otpcr.persist import find, sync, fntime
-from otpcr.utils import laps
+from otp.object  import Object
+from otp.persist import find, sync, fntime
+from otp.utils import laps
 
 
 class Log(Object):

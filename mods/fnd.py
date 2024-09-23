@@ -7,9 +7,9 @@
 import time
 
 
-from otpcr.object  import fmt
-from otpcr.persist import find, fntime, long, skel, store
-from otpcr.utils   import laps
+from otp.object  import fmt
+from otp.persist import find, fntime, long, skel, store
+from otp.utils   import laps
 
 
 def fnd(event):

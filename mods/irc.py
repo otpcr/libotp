@@ -16,11 +16,11 @@ import time
 import _thread
 
 
-from otpcr.client  import Broker, Client, command
-from otpcr.command import Event
-from otpcr.object  import Default, Object, edit, fmt, keys
-from otpcr.persist import last, sync
-from otpcr.runtime import later, launch
+from otp.client  import Broker, Client, command
+from otp.command import Event
+from otp.object  import Default, Object, edit, fmt, keys
+from otp.persist import last, sync
+from otp.runtime import later, launch
 
 
 NAME = Client.__module__.split(".", maxsplit=2)[-2]

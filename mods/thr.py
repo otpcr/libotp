@@ -8,9 +8,9 @@ import threading
 import time
 
 
-from otpcr.object  import Object, update
-from otpcr.runtime import STARTTIME
-from otpcr.utils import laps
+from otp.object  import Object, update
+from otp.runtime import STARTTIME
+from otp.utils import laps
 
 
 def thr(event):

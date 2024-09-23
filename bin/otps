@@ -13,10 +13,10 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.config  import Config
-from otpcr.command import parse, scanner
-from otpcr.main    import forever, modnames, pidfile, privileges, wrap
-from otpcr.runtime import errors
+from otp.config  import Config
+from otp.command import parse, scanner
+from otp.main    import forever, modnames, pidfile, privileges, wrap
+from otp.runtime import errors
 
 
 if os.path.exists('mods'):
