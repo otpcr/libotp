@@ -1,11 +1,4 @@
 # This file is placed in the Public Domain.
-# pylint: disable=W0622
 
 
-"package"
-
-
-import os
-
-
-__doc__ = __file__.rsplit(os.sep, maxsplit=2)[-2].upper()
+"Office of the Prosecutor Communication 117 of 2019"

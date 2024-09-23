@@ -8,9 +8,9 @@
 import time
 
 
-from otp.client  import laps
 from otp.object  import Object
 from otp.persist import find, fntime, sync
+from otp.utils   import laps
 
 
 class NoDate(Exception):

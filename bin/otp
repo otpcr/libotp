@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=R,C,W0212
-
+# pylint: disable=C0413
 
 "main program"
 
@@ -16,10 +15,10 @@ sys.path.insert(0, os.getcwd())
 
 
 from otp.config  import Config
-from otp.event   import Event
 from otp.client  import Client
-from otp.client  import banner, command, daemon, forever, modnames, parse
-from otp.client  import pidfile, privileges, scanner, wrap
+from otp.command import command, parse, scanner
+from otp.event   import Event
+from otp.main    import banner, modnames, privileges, wrap
 from otp.runtime import errors
 
 
@@ -29,23 +28,9 @@ else:
     MODS = None
 
 
-class Console(Client):
+class CLI(Client):
 
-    "Console"
-
-    def callback(self, evt):
-        "wait for result."
-        Client.callback(self, evt)
-        if evt._thr:
-            evt._thr.join()
-
-    def poll(self):
-        "poll console and create event."
-        evt = Event()
-        evt.orig = repr(self)
-        evt.txt = input("> ")
-        evt.type = "command"
-        return evt
+    "CLI"
 
     def raw(self, txt):
         "print text."
@@ -56,30 +41,18 @@ def main():
     "main"
     readline.redisplay()
     parse(Config, " ".join(sys.argv[1:]))
+    if not Config.txt:
+        return None
     Config.mod = ",".join(modnames(MODS))
     Config.user = getpass.getuser()
-    if "d" in Config.opts:
-        daemon()
-        privileges(Config.user)
-        pidfile(Config.pidfile)
-        for mod in scanner(Config.mod, MODS):
-            if "init" in dir(mod):
-                mod.init()
-        forever()
-        return
+    privileges(Config.user)
     if "v" in Config.opts:
         banner(print)
-    for mod in scanner(Config.mod, MODS):
-        if "i" in Config.opts and "init" in dir(mod):
-            mod.init()
-    csl = Console()
-    if "c" in Config.opts:
-        csl.start()
-        forever()
-    elif Config.txt:
-        evt = Event()
-        evt.orig = repr(csl)
-        return command(csl, evt, Config.otxt)
+    scanner(Config.mod, MODS)
+    cli = CLI()
+    evt = Event()
+    evt.orig = repr(cli)
+    command(cli, evt, Config.otxt)
 
 
 if __name__ == "__main__":

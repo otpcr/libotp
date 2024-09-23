@@ -4,8 +4,8 @@
 "availalbe commands."
 
 
-from otp.client import Commands
-from otp.object import keys
+from otp.command import Commands
+from otp.object  import keys
 
 
 def cmd(event):

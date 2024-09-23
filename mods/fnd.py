@@ -7,7 +7,7 @@
 import time
 
 
-from otp.client  import laps
+from otp.main    import laps
 from otp.object  import fmt
 from otp.persist import find, fntime, long, skel, store
 

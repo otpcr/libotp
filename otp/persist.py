@@ -191,6 +191,7 @@ def __dir__():
         'find',
         'fns',
         'fetch',
+        'laps',
         'last'
         'long',
         'read',

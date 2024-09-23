@@ -19,12 +19,14 @@ sys.path.insert(0, os.getcwd())
 
 
 from otp.config  import Config
-from otp.client  import Client, Commands, laps, modnames, parse, scanner, wrap
+from otp.client  import Client
+from otp.command import Commands, parse, scanner
 from otp.event   import Event
+from otp.main    import modnames, wrap
 from otp.object  import Default, Object
 from otp.persist import Workdir, skel
 from otp.runtime import errors, later, launch
-
+from otp.utils   import laps
 
 STARTTIME = time.time()
 
