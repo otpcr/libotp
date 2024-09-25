@@ -10,6 +10,7 @@ import os
 import readline
 import sys
 import termios
+import time
 
 
 sys.path.insert(0, os.getcwd())
@@ -18,6 +19,7 @@ sys.path.insert(0, os.getcwd())
 from otp.command import Event, command, parse
 from otp.modules import face
 from otp.object  import Config
+from otp.persist import Workdir
 from otp.runtime import Client, errors, forever, later, launch
 
 
@@ -54,6 +56,12 @@ class Console(Client):
     def raw(self, txt):
         "print text."
         print(txt)
+
+
+def banner():
+    "show banner."
+    tme = time.ctime(time.time()).replace("  ", " ")
+    print(f"{Workdir.name.upper()} since {tme}")
 
 
 def init(*pkgs):
@@ -95,6 +103,7 @@ def wrap(func, outer):
 
 def main():
     "main"
+    banner()
     cfg.txt = " ".join(sys.argv[1:])
     parse(cfg)
     init(face, MODS)

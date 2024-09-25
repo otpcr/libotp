@@ -9,6 +9,7 @@ import queue
 import threading
 import time
 import traceback
+import types
 import _thread
 
 
@@ -239,6 +240,8 @@ class Repeater(Timer):
         super().run()
 
 
+
+
 def forever():
     "it doesn't stop, until ctrl-c"
     while True:
@@ -248,14 +251,50 @@ def forever():
             _thread.interrupt_main()
 
 
+def init(*pkgs):
+    "scan modules for commands and classes"
+    for pkg in pkgs:
+        for modname in modnames(pkg):
+            modi = getattr(pkg, modname)
+            if "init" not in dir(modi):
+                continue
+            thr = launch(modi.init)
+            yield modi, thr
+
 
 def launch(func, *args, **kwargs):
     "launch a thread."
     with launchlock:
-        name = kwargs.get("name", repr(func))
+        name = kwargs.get("name", named(func))
         thread = Thread(func, name, *args, **kwargs)
         thread.start()
         return thread
+
+
+def modnames(*args):
+    "return module names."
+    res = []
+    for arg in args:
+        res.extend([x for x in dir(arg) if not x.startswith("__")])
+    return sorted(res)
+
+
+def named(obj):
+    "return a full qualified name of an object/function/module."
+    if isinstance(obj, types.ModuleType):
+        return obj.__name__
+    typ = type(obj)
+    if '__builtins__' in dir(typ):
+        return obj.__name__
+    if '__self__' in dir(obj):
+        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj) and '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj):
+        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
+    if '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    return None
 
 
 def __dir__():
@@ -271,5 +310,7 @@ def __dir__():
         'errors',
         'later',
         'launch',
+        'init',
+        'modnames',
         'named'
     )

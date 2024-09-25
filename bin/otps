@@ -2,7 +2,7 @@
 # This file is placed in the Public Domain.
 
 
-"service"
+"daemon"
 
 
 import getpass
@@ -13,30 +13,36 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from otp.config  import Config
-from otp.command import parse, scanner
-from otp.main    import forever, modnames, pidfile, privileges, wrap
-from otp.runtime import errors
+from otpcr.command import parse, scanner
+from otpcr.modules import face
+from otpcr.persist import Workdir
+from otpcr.runtime import Client, errors, init 
 
 
-if os.path.exists('mods'):
-    from mods import face as MODS
-else:
-    MODS = None
+def pidfile(pid):
+    "write the pid to a file."
+    if os.path.exists(pid):
+        os.unlink(pid)
+    path = pathlib.Path(pid)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(pid, "w", encoding="utf-8") as fds:
+        fds.write(str(os.getpid()))
+
+
+def privileges(username):
+    "drop privileges."
+    pwnam = pwd.getpwnam(username)
+    os.setgid(pwnam.pw_gid)
+    os.setuid(pwnam.pw_uid)
 
 
 def main():
     "main"
-    mods = ",".join(modnames(MODS))
-    user = getpass.getuser()
-    privileges(user)
-    pidfile(Config.pidfile)
-    for mod in scanner(mods, MODS):
-        if "init" in dir(mod):
-            mod.init()
+    privileges(getpass.getuser())
+    pidfile(Workdir.piofile)
+    init(face, MODS):
     forever()
 
 
 if __name__ == "__main__":
-    wrap(main, print)
-    errors(print)
+    main()

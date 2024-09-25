@@ -8,6 +8,7 @@ import threading
 import time
 
 
+from otp.command import Commands
 from otp.object  import Object, update
 from otp.persist import laps
 from otp.runtime import STARTTIME
@@ -38,3 +39,6 @@ def thr(event):
         event.reply(' '.join(res))
     else:
         event.reply('no threads')
+
+
+Commands.add(thr)
