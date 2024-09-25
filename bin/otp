@@ -16,19 +16,12 @@ sys.path.insert(0, os.getcwd())
 
 
 from otp.command import Event, command, parse
-from otp.modules import face
 from otp.object  import Config 
 from otp.runtime import Client, errors
 
 
-MODS = None
-
-
 if os.path.exists("mods"):
-     from mods import face as MODS
-
-
-cfg = Config()
+     from mods import face
 
 
 class CLI(Client):
@@ -42,9 +35,8 @@ class CLI(Client):
 
 def main():
     "main"
+    cfg = Default()
     parse(cfg, " ".join(sys.argv[1:]))
-    if not cfg.txt:
-        return None
     cli = CLI()
     evt = Event()
     evt.orig = repr(cli)

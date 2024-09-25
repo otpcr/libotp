@@ -17,19 +17,16 @@ sys.path.insert(0, os.getcwd())
 
 
 from otp.command import Event, command, parse
-from otp.modules import face
-from otp.object  import Config
+from otp.object  import Default
 from otp.persist import Workdir
-from otp.runtime import Client, errors, forever, later, launch
+from otp.runtime import Client, errors, forever, init, later, launch
+
+
+MODS = None
 
 
 if os.path.exists('mods'):
     from mods import face as MODS
-else:
-    MODS = None
-
-
-cfg = Config()
 
 
 class Console(Client):
@@ -64,25 +61,6 @@ def banner():
     print(f"{Workdir.name.upper()} since {tme}")
 
 
-def init(*pkgs):
-    "scan modules for commands and classes"
-    for pkg in pkgs:
-        for modname in modnames(pkg):
-            modi = getattr(pkg, modname)
-            if "init" not in dir(modi):
-                continue
-            thr = launch(modi.init)
-            yield modi, thr
-
-
-def modnames(*args):
-    "return module names."
-    res = []
-    for arg in args:
-        res.extend([x for x in dir(arg) if not x.startswith("__")])
-    return sorted(res)
-
-
 def wrap(func, outer):
     "reset console."
     old3 = None
@@ -103,10 +81,12 @@ def wrap(func, outer):
 
 def main():
     "main"
-    banner()
-    cfg.txt = " ".join(sys.argv[1:])
-    parse(cfg)
-    init(face, MODS)
+    cfg = Default()
+    parse(cfg, " ".join(sys.argv[1:]))
+    if "v" in cfg.opts:
+        banner()
+    if "i" in cfg.opts:
+        init(MODS)
     csl = Console()
     csl.start()
     forever()

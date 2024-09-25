@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0212,W0718
+# pylint: disable=R,W0718
 
 
 "runtime"
@@ -14,10 +14,6 @@ import _thread
 
 
 STARTTIME = time.time()
-
-
-launchlock = _thread.allocate_lock()
-threadlock = _thread.allocate_lock()
 
 
 class Broker:
@@ -129,20 +125,40 @@ class Reactor:
                 break
 
 
+class Client(Reactor):
+
+    "Client"
+
+    def __init__(self):
+        Reactor.__init__(self)
+        Broker.add(self)
+
+    def display(self, evt):
+        "show results into a channel."
+        for txt in evt.result:
+            self.say(evt.channel, txt)
+
+    def say(self, _channel, txt):
+        "echo on verbose."
+        self.raw(txt)
+
+    def raw(self, txt):
+        "print to screen."
+        raise NotImplementedError
+
+
 class Thread(threading.Thread):
 
     "Thread"
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        with threadlock:
-            super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-            self.name      = thrname
-            self.out       = None
-            self.queue     = queue.Queue()
-            self.result    = None
-            self.sleep     = None
-            self.starttime = time.time()
-            self.queue.put_nowait((func, args))
+        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
+        self.name      = thrname
+        self.queue     = queue.Queue()
+        self.result    = None
+        self.sleep     = None
+        self.starttime = time.time()
+        self.queue.put_nowait((func, args))
 
     def __contains__(self, key):
         return key in self.__dict__
@@ -171,28 +187,6 @@ class Thread(threading.Thread):
             _thread.interrupt_main()
         except Exception as ex:
             later(ex)
-
-
-class Client(Reactor):
-
-    "Client"
-
-    def __init__(self):
-        Reactor.__init__(self)
-        Broker.add(self)
-
-    def display(self, evt):
-        "show results into a channel."
-        for txt in evt.result:
-            self.say(evt.channel, txt)
-
-    def say(self, _channel, txt):
-        "echo on verbose."
-        self.raw(txt)
-
-    def raw(self, txt):
-        "print to screen."
-        raise NotImplementedError
 
 
 class Timer:
@@ -240,8 +234,6 @@ class Repeater(Timer):
         super().run()
 
 
-
-
 def forever():
     "it doesn't stop, until ctrl-c"
     while True:
@@ -253,8 +245,11 @@ def forever():
 
 def init(*pkgs):
     "scan modules for commands and classes"
+    print("yo!")
     for pkg in pkgs:
+        print(pkg)
         for modname in modnames(pkg):
+            print(modname)
             modi = getattr(pkg, modname)
             if "init" not in dir(modi):
                 continue
@@ -264,11 +259,10 @@ def init(*pkgs):
 
 def launch(func, *args, **kwargs):
     "launch a thread."
-    with launchlock:
-        name = kwargs.get("name", named(func))
-        thread = Thread(func, name, *args, **kwargs)
-        thread.start()
-        return thread
+    name = kwargs.get("name", named(func))
+    thread = Thread(func, name, *args, **kwargs)
+    thread.start()
+    return thread
 
 
 def modnames(*args):
@@ -308,9 +302,9 @@ def __dir__():
         'Timer',
         'forever',
         'errors',
+        'init',
         'later',
         'launch',
-        'init',
         'modnames',
         'named'
     )
