@@ -18,29 +18,18 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otp.config  import Config
-from otp.client  import Client
-from otp.command import Commands, Event, parse, scanner
-from otp.main    import modnames, wrap
+from otp.command import Commands, Event, command, parse
 from otp.object  import Default, Object
-from otp.persist import Workdir, skel
-from otp.runtime import STARTTIME, errors, later, launch
-from otp.utils   import laps
+from otp.persist import Workdir, laps, skel
+from otp.runtime import STARTTIME, Client, errors, later, launch
 
 
-Config.debug  = True
-Config.name = "tinder"
-Config.silent = False
-Config.skip = ["debug",]
+cfg = Default()
 
 
 if os.path.exists("mods"):
     from mods import face as MODS
-else:
-    MODS = None
-
-
-MODS.rss.DEBUG = True
+    MODS.rss.DEBUG = True
 
 
 LAP = 1
@@ -76,22 +65,19 @@ class CLI(Client):
 
     "command line interface."
 
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
+
     def raw(self, txt):
-        if "v" in Config.opts:
+        if "v" in cfg.opts:
             print(txt)
 
 
 def banner():
     "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Config.name.upper()} since {tme}")
-
-
-def consume(evts):
-    "wait for events."
-    for evt in evts:
-        if "_thr" in evt and evt._thr:
-            evt._thr.join()
+    print(f"{Workdir.name.upper()} since {tme}")
 
 
 def payload(clt):
@@ -110,25 +96,42 @@ def payload(clt):
         return nmr
 
 
-def mainer():
+def wrap(func):
+    "reset console."
+    old = None
+    try:
+        old = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    except Exception as ex:
+        later(ex)
+    finally:
+        if old:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+
+
+def main():
     "main"
+    Workdir.wdr = ".test"
+    parse(cfg, " ".join(sys.argv[1:]))
     NRCOMMAND = len(Commands.cmds) or 1
-    if "v" in Config.opts:
+    if "v" in cfg.opts:
         banner()
-    Config.mod = ",".join(modnames(MODS))
-    scanner(Config.mod, MODS)
-    if "f" in Config.opts:
+    if "f" in cfg.opts:
         if os.path.exists(Workdir.wdr):
             shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
-    nrs = Config.index or 1
+    nrs = cfg.index or 1
     for _nr in range(nrs):
         launch(payload, clt)
     clt.wait()
-    consume(events)
-    if "v" in Config.opts:
+    if "v" in cfg.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
         percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
@@ -136,11 +139,5 @@ def mainer():
 
 
 if __name__ == "__main__":
-    Workdir.wdr = ".test"
-    parse(Config, " ".join(sys.argv[1:]))
-    if "p" in Config.opts:
-        profile.runctx(mainer.__code__, globals(), locals())
-    else:
-        wrap(mainer, print)
+    main()
     errors(print)
-    os._exit(0)

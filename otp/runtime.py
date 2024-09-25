@@ -64,12 +64,14 @@ def errors(outer):
             outer(line.strip())
 
 
-def later(exc):
+def later(exc, evt=None):
     "add an exception"
     excp = exc.with_traceback(exc.__traceback__)
     fmt = fmat(excp)
     if fmt not in Errors.errors:
         Errors.errors.append(fmt)
+    if evt:
+        evt.ready()
 
 
 class Reactor:
@@ -197,7 +199,7 @@ class Timer:
         self.args  = args
         self.func  = func
         self.sleep = sleep
-        self.name  = thrname
+        self.name  = thrname or named(func)
         self.state = {}
         self.timer = None
 
@@ -245,16 +247,15 @@ def forever():
 
 def init(*pkgs):
     "scan modules for commands and classes"
-    print("yo!")
+    mods = []
     for pkg in pkgs:
-        print(pkg)
         for modname in modnames(pkg):
-            print(modname)
             modi = getattr(pkg, modname)
             if "init" not in dir(modi):
                 continue
             thr = launch(modi.init)
-            yield modi, thr
+            mods.append((modi, thr))
+    return mods
 
 
 def launch(func, *args, **kwargs):
@@ -291,6 +292,14 @@ def named(obj):
     return None
 
 
+def poll(evt):
+    "poll for results"
+    while True:
+        time.sleep(0.001)
+        if evt.result:
+            break
+
+
 def __dir__():
     return (
         'Broker',
@@ -306,5 +315,6 @@ def __dir__():
         'later',
         'launch',
         'modnames',
-        'named'
+        'named',
+        'poll'
     )

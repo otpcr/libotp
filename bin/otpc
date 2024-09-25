@@ -19,7 +19,7 @@ sys.path.insert(0, os.getcwd())
 from otp.command import Event, command, parse
 from otp.object  import Default
 from otp.persist import Workdir
-from otp.runtime import Client, errors, forever, init, later, launch
+from otp.runtime import Client, errors, forever, init, later, launch, poll
 
 
 MODS = None
@@ -40,7 +40,7 @@ class Console(Client):
     def callback(self, evt):
         "wait for result."
         Client.callback(self, evt)
-        evt.wait()
+        poll(evt)
 
     def poll(self):
         "poll console and create event."
