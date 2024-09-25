@@ -7,16 +7,16 @@
 import time
 
 
+from otp.command import Commands
 from otp.object  import fmt
-from otp.persist import find, fntime, long, skel, store
-from otp.utils   import laps
+from otp.persist import find, fntime, laps, long, skel, store, types
 
 
 def fnd(event):
     "locate objects."
     skel()
     if not event.rest:
-        res = sorted([x.split('.')[-1].lower() for x in store()])
+        res = sorted([x.split('.')[-1].lower() for x in types()])
         if res:
             event.reply(",".join(res))
         return
@@ -35,4 +35,4 @@ def fnd(event):
         event.reply("no result")
 
 
-fnd.target = "cli"
+Commands.add(fnd)

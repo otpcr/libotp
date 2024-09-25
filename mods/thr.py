@@ -9,8 +9,8 @@ import time
 
 
 from otp.object  import Object, update
+from otp.persist import laps
 from otp.runtime import STARTTIME
-from otp.utils import laps
 
 
 def thr(event):

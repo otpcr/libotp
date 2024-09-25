@@ -9,18 +9,16 @@ import getpass
 import os
 import readline
 import sys
+import termios
 
 
 sys.path.insert(0, os.getcwd())
 
 
-
-from otp.config  import Config
-from otp.client  import Client
-from otp.command import Event, command, parse, scanner
-from otp.main    import banner, forever, initter, modnames
-from otp.main    import privileges, wrap
-from otp.runtime import errors
+from otp.command import Event, command, parse
+from otp.modules import face
+from otp.object  import Config
+from otp.runtime import Client, errors, forever, later, launch
 
 
 if os.path.exists('mods'):
@@ -29,15 +27,21 @@ else:
     MODS = None
 
 
+cfg = Config()
+
+
 class Console(Client):
 
     "Console"
 
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
+
     def callback(self, evt):
         "wait for result."
         Client.callback(self, evt)
-        if evt._thr:
-            evt._thr.join()
+        evt.wait()
 
     def poll(self):
         "poll console and create event."
@@ -52,21 +56,48 @@ class Console(Client):
         print(txt)
 
 
+def init(*pkgs):
+    "scan modules for commands and classes"
+    for pkg in pkgs:
+        for modname in modnames(pkg):
+            modi = getattr(pkg, modname)
+            if "init" not in dir(modi):
+                continue
+            thr = launch(modi.init)
+            yield modi, thr
+
+
+def modnames(*args):
+    "return module names."
+    res = []
+    for arg in args:
+        res.extend([x for x in dir(arg) if not x.startswith("__")])
+    return sorted(res)
+
+
+def wrap(func, outer):
+    "reset console."
+    old3 = None
+    try:
+        old3 = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        outer("")
+    except Exception as ex:
+        later(ex)
+    finally:
+        if old3:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
+
+
 def main():
     "main"
-    readline.redisplay()
-    parse(Config, " ".join(sys.argv[1:]))
-    modstr = ",".join(modnames(MODS))
-    user = getpass.getuser()
-    if "v" in Config.opts:
-        banner(print)
-    for mod in scanner(modstr, MODS):
-        if "v" in Config.opts:
-            mod.VERBOSE = print
-    if "i" in Config.opts:
-        thrs = initter(modstr, MODS)
-        for thr in thrs:
-            thr.join()
+    cfg.txt = " ".join(sys.argv[1:])
+    parse(cfg)
+    init(face, MODS)
     csl = Console()
     csl.start()
     forever()

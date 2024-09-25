@@ -16,11 +16,10 @@ import time
 import _thread
 
 
-from otp.client  import Broker, Client, command
-from otp.command import Event
+from otp.command import Commands, Event, command
 from otp.object  import Default, Object, edit, fmt, keys
 from otp.persist import last, sync
-from otp.runtime import later, launch
+from otp.runtime import Broker, Client, later, launch
 
 
 NAME = Client.__module__.split(".", maxsplit=2)[-2]
@@ -207,7 +206,6 @@ class IRC(Client, Output):
         self.register('PRIVMSG', cb_privmsg)
         self.register('QUIT', cb_quit)
         self.register("366", cb_ready)
-        Broker.add(self, repr(self))
 
     def announce(self, txt):
         "announce on all channels."
@@ -642,6 +640,9 @@ def cfg(event):
         event.reply('ok')
 
 
+Commands.add(cfg)
+
+
 def mre(event):
     "show from output cache."
     if not event.channel:
@@ -662,6 +663,9 @@ def mre(event):
     event.reply(f'{size} more in cache')
 
 
+Commands.add(mre)
+
+
 def pwd(event):
     "create a base64 password."
     if len(event.args) != 2:
@@ -674,3 +678,6 @@ def pwd(event):
     base = base64.b64encode(enc)
     dcd = base.decode('ascii')
     event.reply(dcd)
+
+
+Commands.add(pwd)

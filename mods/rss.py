@@ -20,11 +20,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from otp.broker  import Broker
-from otp.utils   import laps
+from otp.command import Commands
 from otp.object  import Default, Object, construct, fmt, update
-from otp.persist import find, fntime, last, sync
-from otp.runtime import Repeater, launch
+from otp.persist import find, fntime, laps, last, sync
+from otp.runtime import Broker, Repeater, launch
 
 
 def init():
@@ -310,6 +309,9 @@ def dpl(event):
     event.reply('ok')
 
 
+Commands.add(dpl)
+
+
 def nme(event):
     "set name of feed."
     if len(event.args) != 2:
@@ -321,6 +323,9 @@ def nme(event):
             feed.name = event.args[1]
             sync(feed, fnm)
     event.reply('ok')
+
+
+Commands.add(nme)
 
 
 def rem(event):
@@ -337,6 +342,9 @@ def rem(event):
     event.reply('ok')
 
 
+Commands.add(rem)
+
+
 def res(event):
     "restore a feed."
     if len(event.args) != 1:
@@ -349,6 +357,9 @@ def res(event):
             feed.__deleted__ = False
             sync(feed, fnm)
     event.reply('ok')
+
+
+Commands.add(res)
 
 
 def rss(event):
@@ -376,6 +387,9 @@ def rss(event):
     event.reply('ok')
 
 
+Commands.add(rss)
+
+
 def syn(event):
     "synchronize feeds."
     if DEBUG:
@@ -388,6 +402,9 @@ def syn(event):
         thr.join()
         nrs += 1
     event.reply(f"{nrs} feeds synced")
+
+
+Commands.add(syn)
 
 
 class OPMLParser:
@@ -486,6 +503,9 @@ def exp(event):
     event.reply("</opml>")
 
 
+Commands.add(exp)
+
+
 def imp(event):
     "import opml."
     if not event.args:
@@ -523,3 +543,6 @@ def imp(event):
         event.reply(f"skipped {nrskip} urls.")
     if nrs:
         event.reply(f"added {nrs} urls.")
+
+
+Commands.add(imp)

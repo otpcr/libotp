@@ -8,9 +8,9 @@
 import time
 
 
+from otp.command import Commands
 from otp.object  import Object
-from otp.persist import find, sync, fntime
-from otp.utils import laps
+from otp.persist import find, laps, sync, fntime
 
 
 class Log(Object):
@@ -37,3 +37,6 @@ def log(event):
     obj.txt = event.rest
     sync(obj)
     event.reply('ok')
+
+
+Commands.add(log)

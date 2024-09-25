@@ -8,9 +8,9 @@
 import time
 
 
+from otp.command import Commands
 from otp.object  import Object
-from otp.persist import find, fntime, sync
-from otp.utils import laps
+from otp.persist import find, fntime, laps, sync
 
 
 class NoDate(Exception):
@@ -44,6 +44,9 @@ def dne(event):
         event.reply("nothing todo")
 
 
+Commands.add(dne)
+
+
 def tdo(event):
     "add todo."
     if not event.rest:
@@ -59,3 +62,6 @@ def tdo(event):
     obj.txt = event.rest
     sync(obj)
     event.reply('ok')
+
+
+Commands.add(tdo)

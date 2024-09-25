@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libotp"
-version = "2"
+version = "3"
 authors = [
     {name = "Bart Thate", email = "record11719@gmail.com" },
 ]
@@ -36,4 +36,5 @@ classifiers=[
 [tool.setuptools]
 packages = [
    'otp',
+   'otp.modules'
 ]

@@ -7,10 +7,14 @@
 import time
 
 
+from otp.command import Commands
+from otp.persist import laps
 from otp.runtime import STARTTIME
-from otp.utils   import laps
 
 
 def upt(event):
     "show uptime"
     event.reply(laps(time.time()-STARTTIME))
+
+
+Commands.add(upt)

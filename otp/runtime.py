@@ -16,6 +16,35 @@ import _thread
 STARTTIME = time.time()
 
 
+launchlock = _thread.allocate_lock()
+threadlock = _thread.allocate_lock()
+
+
+class Broker:
+
+    "Broker"
+
+    objs = {}
+
+    @staticmethod
+    def add(obj):
+        "add object."
+        Broker.objs[repr(obj)] = obj
+
+    @staticmethod
+    def all(kind=None):
+        "return all objects."
+        if kind is not None:
+            for key in [x for x in Broker.objs if kind in x]:
+                yield Broker.get(key)
+        return Broker.objs.values()
+
+    @staticmethod
+    def get(orig):
+        "return object by matching repr."
+        return Broker.objs.get(orig)
+
+
 class Errors:
 
     "Errors"
@@ -59,11 +88,8 @@ class Reactor:
     def callback(self, evt):
         "call callback based on event type."
         func = self.cbs.get(evt.type, None)
-        if not func:
-            return
-        if "target" in dir(func) and func.target not in str(self).lower():
-            return
-        evt._thr = launch(func, self, evt)
+        if func:
+            launch(func, self, evt)
 
     def loop(self):
         "proces events until interrupted."
@@ -101,7 +127,6 @@ class Reactor:
         while not self.stopped.is_set():
             if not self.queue.qsize():
                 break
-            time.sleep(0.1)
 
 
 class Thread(threading.Thread):
@@ -109,14 +134,15 @@ class Thread(threading.Thread):
     "Thread"
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-        self._result   = None
-        self.name      = thrname or (func and named(func)) or named(self).split(".")[-1]
-        self.out       = None
-        self.queue     = queue.Queue()
-        self.sleep     = None
-        self.starttime = time.time()
-        self.queue.put_nowait((func, args))
+        with threadlock:
+            super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
+            self.name      = thrname
+            self.out       = None
+            self.queue     = queue.Queue()
+            self.result    = None
+            self.sleep     = None
+            self.starttime = time.time()
+            self.queue.put_nowait((func, args))
 
     def __contains__(self, key):
         return key in self.__dict__
@@ -134,17 +160,39 @@ class Thread(threading.Thread):
     def join(self, timeout=None):
         "join this thread."
         super().join(timeout)
-        return self._result
+        return self.result
 
     def run(self):
         "run this thread's payload."
         try:
             func, args = self.queue.get()
-            self._result = func(*args)
+            self.result = func(*args)
         except (KeyboardInterrupt, EOFError):
             _thread.interrupt_main()
         except Exception as ex:
             later(ex)
+
+
+class Client(Reactor):
+
+    "Client"
+
+    def __init__(self):
+        Reactor.__init__(self)
+        Broker.add(self)
+
+    def display(self, evt):
+        "show results into a channel."
+        for txt in evt.result:
+            self.say(evt.channel, txt)
+
+    def say(self, _channel, txt):
+        "echo on verbose."
+        self.raw(txt)
+
+    def raw(self, txt):
+        "print to screen."
+        raise NotImplementedError
 
 
 class Timer:
@@ -155,7 +203,7 @@ class Timer:
         self.args  = args
         self.func  = func
         self.sleep = sleep
-        self.name  = thrname or named(func)
+        self.name  = thrname
         self.state = {}
         self.timer = None
 
@@ -192,39 +240,35 @@ class Repeater(Timer):
         super().run()
 
 
+def forever():
+    "it doesn't stop, until ctrl-c"
+    while True:
+        try:
+            time.sleep(1.0)
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+
+
+
 def launch(func, *args, **kwargs):
     "launch a thread."
-    nme = kwargs.get("name", named(func))
-    thread = Thread(func, nme, *args, **kwargs)
-    thread.start()
-    return thread
-
-
-def named(obj):
-    "return a full qualified name of an object/function/module."
-    if isinstance(obj, types.ModuleType):
-        return obj.__name__
-    typ = type(obj)
-    if '__builtins__' in dir(typ):
-        return obj.__name__
-    if '__self__' in dir(obj):
-        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj) and '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj):
-        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
-    if '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    return None
+    with launchlock:
+        name = kwargs.get("name", repr(func))
+        thread = Thread(func, name, *args, **kwargs)
+        thread.start()
+        return thread
 
 
 def __dir__():
     return (
+        'Broker',
+        'Client',
         'Errors',
         'Reactor',
         'Repeater',
         'Thread',
         'Timer',
+        'forever',
         'errors',
         'later',
         'launch',

@@ -2,6 +2,7 @@
 # This file is placed in the Public Domain.
 # pylint: disable=R,C0413
 
+
 "main program"
 
 
@@ -14,17 +15,20 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from otp.config  import Config
-from otp.client  import Client
-from otp.command import Event, command, parse, scanner
-from otp.main    import banner, modnames, privileges, wrap
-from otp.runtime import errors
+from otp.command import Event, command, parse
+from otp.modules import face
+from otp.object  import Config 
+from otp.runtime import Client, errors
 
 
-if os.path.exists('mods'):
-    from mods import face as MODS
-else:
-    MODS = None
+MODS = None
+
+
+if os.path.exists("mods"):
+     from mods import face as MODS
+
+
+cfg = Config()
 
 
 class CLI(Client):
@@ -38,22 +42,16 @@ class CLI(Client):
 
 def main():
     "main"
-    readline.redisplay()
-    parse(Config, " ".join(sys.argv[1:]))
-    if not Config.txt:
+    parse(cfg, " ".join(sys.argv[1:]))
+    if not cfg.txt:
         return None
-    Config.mod = ",".join(modnames(MODS))
-    Config.user = getpass.getuser()
-    privileges(Config.user)
-    if "v" in Config.opts:
-        banner(print)
-    scanner(Config.mod, MODS)
     cli = CLI()
     evt = Event()
     evt.orig = repr(cli)
-    command(cli, evt, Config.otxt)
+    evt.txt = cfg.txt
+    command(cli, evt)
 
 
 if __name__ == "__main__":
-    wrap(main, print)
+    main()
     errors(print)

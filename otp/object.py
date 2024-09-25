@@ -39,6 +39,11 @@ class Default(Object):
         return self.__dict__.get(key, "")
 
 
+class Config(Default):
+
+    "Config"
+
+
 def construct(obj, *args, **kwargs):
     "construct an object from provided arguments."
     if args:
@@ -268,6 +273,7 @@ def dumps(*args, **kw):
 
 def __dir__():
     return (
+        'Config',
         'Default',
         'Object',
         'construct',
