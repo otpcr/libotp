@@ -292,13 +292,16 @@ def named(obj):
     return None
 
 
-def poll(evt):
+def poll(evt, tries=1000):
     "poll for results"
+    nr = tries
     while True:
         time.sleep(0.001)
         if evt.result:
             break
-
+        tries -= 1
+        if tries == 0:
+            break
 
 def __dir__():
     return (

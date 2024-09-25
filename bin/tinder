@@ -21,7 +21,7 @@ sys.path.insert(0, os.getcwd())
 from otp.command import Commands, Event, command, parse
 from otp.object  import Default, Object
 from otp.persist import Workdir, laps, skel
-from otp.runtime import STARTTIME, Client, errors, later, launch
+from otp.runtime import STARTTIME, Client, errors, later, launch, poll
 
 
 cfg = Default()
@@ -80,6 +80,11 @@ def banner():
     print(f"{Workdir.name.upper()} since {tme}")
 
 
+def consume(events):
+    for evt in events:
+        poll(evt)
+
+
 def payload(clt):
     "do payload."
     with paylock:
@@ -130,6 +135,7 @@ def main():
     nrs = cfg.index or 1
     for _nr in range(nrs):
         launch(payload, clt)
+    consume(events)
     clt.wait()
     if "v" in cfg.opts:
         endtime = time.time()
