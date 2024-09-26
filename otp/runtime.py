@@ -209,6 +209,8 @@ class Thread(threading.Thread):
         "run this thread's payload."
         try:
             func, args = self.queue.get()
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
         except Exception as ex:
             later(ex)
             return
@@ -219,7 +221,7 @@ class Thread(threading.Thread):
         except Exception as ex:
             later(ex)
             ready(args)
-                
+
 
 class Timer:
 
@@ -323,6 +325,7 @@ def named(obj):
 
 
 def ready(*args):
+    "flag arguments as ready."
     for arg in args:
         if "ready" in dir(arg):
             arg.ready()
