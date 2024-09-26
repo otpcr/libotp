@@ -7,16 +7,23 @@
 
 import getpass
 import os
+import pathlib
+import pwd
 import sys
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import parse, scanner
-from otpcr.modules import face
-from otpcr.persist import Workdir
-from otpcr.runtime import Client, errors, init 
+from otp.persist import Workdir
+from otp.runtime import errors, forever, init 
+
+
+MODS = None
+
+
+if os.path.exists('mods'):
+    from mods import face as MODS
 
 
 def daemon(verbose=False):
@@ -59,10 +66,10 @@ def privileges(username):
 
 def main():
     "main"
-    daemon()
+    daemon("-v" in sys.argv)
     privileges(getpass.getuser())
     pidfile(Workdir.pidfile)
-    init(face, MODS):
+    init(MODS)
     forever()
 
 

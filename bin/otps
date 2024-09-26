@@ -7,16 +7,20 @@
 
 import getpass
 import os
+import pathlib
+import pwd
 import sys
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import parse, scanner
-from otpcr.modules import face
-from otpcr.persist import Workdir
-from otpcr.runtime import Client, errors, init 
+from otp.persist import Workdir
+from otp.runtime import errors, forever, init, wrap
+
+
+if os.path.exists('mods'):
+    from mods import face as MODS
 
 
 def pidfile(pid):
@@ -39,10 +43,10 @@ def privileges(username):
 def main():
     "main"
     privileges(getpass.getuser())
-    pidfile(Workdir.piofile)
-    init(face, MODS):
+    pidfile(Workdir.pidfile)
+    init(MODS)
     forever()
 
 
 if __name__ == "__main__":
-    main()
+    wrap(main, print)

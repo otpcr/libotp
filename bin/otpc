@@ -84,7 +84,11 @@ def main():
     if "v" in cfg.opts:
         banner()
     if "i" in cfg.opts:
-        init(MODS)
+        for mod, thr in init(MODS):
+            if "v" in cfg.opts:
+                mod.VERBOSE = print
+            if "w" in cfg.opts:
+                thr.join()
     csl = Console()
     csl.start()
     forever()

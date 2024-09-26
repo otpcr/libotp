@@ -86,6 +86,9 @@ class Event:
         self.txt    = ""
         self.type = "command"
 
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
+
     def ready(self):
         "flag event as ready."
         self._ready.set()
@@ -329,6 +332,16 @@ def ready(*args):
     for arg in args:
         if "ready" in dir(arg):
             arg.ready()
+
+
+def wrap(func, outer):
+    "reset console."
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        outer("")
+    except Exception as ex:
+        later(ex)
 
 
 def __dir__():
