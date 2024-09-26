@@ -11,31 +11,6 @@ import threading
 from .object  import Default
 
 
-class Event(Default):
-
-    "Event"
-
-    def __init__(self):
-        Default.__init__(self)
-        self._ready = threading.Event()
-        self.orig   = ""
-        self.result = []
-        self.txt    = ""
-        self.type = "event"
-
-    def ready(self):
-        "flag event as ready."
-        self._ready.set()
-
-    def reply(self, txt):
-        "add text to the result."
-        self.result.append(txt)
-
-    def wait(self):
-        "wait for results."
-        self._ready.wait()
-
-
 class Commands:
 
     "Commands"
@@ -50,7 +25,8 @@ class Commands:
 
 def command(bot, evt):
     "check for and run a command."
-    parse(evt)
+    parse(evt, evt.txt)
+    evt.orig = repr(bot)
     func = Commands.cmds.get(evt.cmd, None)
     if func:
         func(evt)
@@ -65,14 +41,14 @@ def parse(obj, txt=None):
     args = []
     obj.args    = []
     obj.cmd     = ""
-    obj.gets    = obj.gets or Default()
+    obj.gets    = Default()
     obj.hasmods = False
     obj.index   = None
-    obj.mod     = obj.mod or ""
-    obj.opts    = obj.opts or""
+    obj.mod     = ""
+    obj.opts    = ""
     obj.result  = []
-    obj.sets    = obj.sets or Default()
-    obj.txt     = txt or obj.txt or ""
+    obj.sets    = Default()
+    obj.txt     = txt or ""
     obj.otxt    = obj.txt
     _nr = -1
     for spli in obj.otxt.split():
@@ -118,6 +94,5 @@ def parse(obj, txt=None):
 def __dir__():
     return (
         'Commands',
-        'Event',
         'command'
     )

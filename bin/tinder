@@ -18,10 +18,10 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otp.command import Commands, Event, command, parse
+from otp.command import Commands, command, parse
 from otp.object  import Default, Object
 from otp.persist import Workdir, laps, skel
-from otp.runtime import STARTTIME, Client, errors, later, launch
+from otp.runtime import STARTTIME, Client, Event, errors, later, launch
 
 
 cfg = Default()
@@ -92,9 +92,7 @@ def payload(clt):
         for cmdd in Commands.cmds:
             for ex in getattr(param, cmdd, [""]):
                 evt = Event()
-                evt.orig = repr(clt)
                 evt.txt = cmdd + " " + ex
-                evt.type = "command"
                 clt.put(evt)
                 events.append(evt)
                 nmr += 1

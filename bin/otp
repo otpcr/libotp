@@ -15,9 +15,9 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from otp.command import Event, command, parse
+from otp.command import command, parse
 from otp.object  import Default
-from otp.runtime import Client, errors
+from otp.runtime import Client, Event, errors
 
 
 if os.path.exists("mods"):

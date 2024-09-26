@@ -16,9 +16,9 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from otp.command import Event, command, parse
+from otp.command import command, parse
 from otp.object  import Default
-from otp.runtime import Client, errors, forever, init, later, launch
+from otp.runtime import Client, Event, errors, forever, init, later, launch
 
 
 MODS = None
@@ -45,9 +45,7 @@ class Console(Client):
     def poll(self):
         "poll console and create event."
         evt = Event()
-        evt.orig = repr(self)
         evt.txt = input("> ")
-        evt.type = "command"
         return evt
 
     def raw(self, txt):
