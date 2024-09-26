@@ -18,11 +18,11 @@ sys.path.insert(0, os.getcwd())
 
 from otp.command import Event, command, parse
 from otp.object  import Default
-from otp.persist import Workdir
-from otp.runtime import Client, errors, forever, init, later, launch, poll
+from otp.runtime import Client, errors, forever, init, later, launch
 
 
 MODS = None
+NAME = Default.__module__.split(".", maxsplit=2)[-2]
 
 
 if os.path.exists('mods'):
@@ -40,7 +40,7 @@ class Console(Client):
     def callback(self, evt):
         "wait for result."
         Client.callback(self, evt)
-        poll(evt)
+        evt.wait()
 
     def poll(self):
         "poll console and create event."
@@ -58,7 +58,7 @@ class Console(Client):
 def banner():
     "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Workdir.name.upper()} since {tme}")
+    print(f"{NAME.upper()} since {tme}")
 
 
 def wrap(func, outer):

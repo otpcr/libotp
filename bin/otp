@@ -16,7 +16,7 @@ sys.path.insert(0, os.getcwd())
 
 
 from otp.command import Event, command, parse
-from otp.object  import Config 
+from otp.object  import Default
 from otp.runtime import Client, errors
 
 

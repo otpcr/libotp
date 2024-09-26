@@ -184,12 +184,17 @@ class Thread(threading.Thread):
         "run this thread's payload."
         try:
             func, args = self.queue.get()
+        except Exception as ex:
+            later(ex)
+            return
+        try:
             self.result = func(*args)
         except (KeyboardInterrupt, EOFError):
             _thread.interrupt_main()
         except Exception as ex:
             later(ex)
-
+            ready(args)
+                
 
 class Timer:
 
@@ -292,16 +297,11 @@ def named(obj):
     return None
 
 
-def poll(evt, tries=1000):
-    "poll for results"
-    nr = tries
-    while True:
-        time.sleep(0.001)
-        if evt.result:
-            break
-        tries -= 1
-        if tries == 0:
-            break
+def ready(*args):
+    for arg in args:
+        if "ready" in dir(arg):
+            arg.ready()
+
 
 def __dir__():
     return (
@@ -319,5 +319,5 @@ def __dir__():
         'launch',
         'modnames',
         'named',
-        'poll'
+        'wait'
     )

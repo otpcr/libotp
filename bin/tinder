@@ -21,7 +21,7 @@ sys.path.insert(0, os.getcwd())
 from otp.command import Commands, Event, command, parse
 from otp.object  import Default, Object
 from otp.persist import Workdir, laps, skel
-from otp.runtime import STARTTIME, Client, errors, later, launch, poll
+from otp.runtime import STARTTIME, Client, errors, later, launch
 
 
 cfg = Default()
@@ -82,7 +82,7 @@ def banner():
 
 def consume(events):
     for evt in events:
-        poll(evt)
+        evt.wait()
 
 
 def payload(clt):
